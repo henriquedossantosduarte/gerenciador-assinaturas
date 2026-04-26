@@ -1,18 +1,21 @@
 package br.com.academia.gerenciadorassinaturas.model;
 
 import java.time.LocalDate;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.*;
 
 @Entity
 public class Aluno {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long id;
+    private Long id;  // ← @Id e @GeneratedValue pertencem aqui
+
+    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
+    private List<Pagamento> historicoPagamentos = new ArrayList<>();  // ← @OneToMany pertence aqui
+
     private String nome;
     private int idade;
     private String endereco;
@@ -20,12 +23,13 @@ public class Aluno {
     private String plano;
     private LocalDate dataInicio;
     private int diaVencimento;
+    private LocalDate dataUltimoPagamento;
 
     public Aluno(){
 
     }
 
-    public Aluno(String nome, int idade, String endereco, int numero, String plano, LocalDate dataInicio, int diaVencimento){
+    public Aluno(String nome, int idade, String endereco, int numero, String plano, LocalDate dataInicio, int diaVencimento, LocalDate dataUltimoPagamento){
         this.nome = nome;
         this.idade = idade;
         this.plano = plano;
@@ -33,7 +37,16 @@ public class Aluno {
         this.diaVencimento= diaVencimento;
         this.endereco = endereco;
         this.numero = numero;
+        this.dataUltimoPagamento = dataUltimoPagamento;
 
+    }
+
+    public List<Pagamento> getHistoricoPagamentos() {
+        return historicoPagamentos;
+    }
+
+    public void setHistoricoPagamentos(List<Pagamento> historicoPagamentos) {
+        this.historicoPagamentos = historicoPagamentos;
     }
 
     public Long getId() {
@@ -98,5 +111,38 @@ public class Aluno {
 
     public void setDiaVencimento(int diaVencimento) {
         this.diaVencimento = diaVencimento;
+
+    }
+
+    public LocalDate getDataUltimoPagamento() {
+        return dataUltimoPagamento;
+    }
+
+    public void setDataUltimoPagamento(LocalDate dataUltimoPagamento) {
+        this.dataUltimoPagamento = dataUltimoPagamento;
+    }
+
+    public boolean isVenceHoje(){
+        int diaAtual= java.time.LocalDate.now().getDayOfMonth();
+        return  this.diaVencimento==diaAtual;
+    }
+
+    public boolean isAtrasado() {
+        LocalDate hoje = LocalDate.now();
+
+        // Se nunca pagou, já está atrasado
+        if (dataUltimoPagamento == null) {
+            return hoje.getDayOfMonth() > this.diaVencimento;
+        }
+
+
+        // Se já pagou esse mês, não está atrasado
+        if (dataUltimoPagamento.getMonth() == hoje.getMonth() &&
+                dataUltimoPagamento.getYear() == hoje.getYear()) {
+            return false;
+        }
+
+        // Se não pagou esse mês, verifica se o vencimento já passou
+        return hoje.getDayOfMonth() > this.diaVencimento;
     }
 }

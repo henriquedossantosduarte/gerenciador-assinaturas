@@ -2,37 +2,206 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Academia - Gerenciador</title>
-    <!-- Bootstrap para o celular ficar top -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucca Combat Team - Gestão</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg: #13181d;
+            --surface: #1c232b;
+            --border: rgba(255,255,255,.08);
+            --text: #e9eef4;
+            --muted: #a9b4c0;
+
+            --gold: #f6a11a;
+            --danger: #e04b4b;
+            --success: #32d583;
+        }
+
+        body{
+            background:
+              radial-gradient(800px 400px at 10% 0%, rgba(246,161,26,.15), transparent 60%),
+              linear-gradient(180deg, #1a2127, var(--bg));
+            color: var(--text);
+        }
+
+        h1,h3{
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-lct{
+            background: linear-gradient(180deg, var(--surface), #171d23);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .label{
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .metric{
+            font-size: 50px;
+            font-weight: bold;
+        }
+
+        .gold{ color: var(--gold); }
+        .danger{ color: var(--danger); }
+
+        .btn-gold{
+            background: linear-gradient(45deg, #f6a11a, #ffbf48);
+            border: none;
+            color: #1a1a1a;
+            font-weight: bold;
+            border-radius: 12px;
+        }
+
+           .table-lct{
+            background: linear-gradient(180deg, #1f2730, #1a2128);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.05);
+            padding: 10px;
+}
+
+        table{
+            color: var(--text) !important;
+        }
+
+        thead{
+            background: rgba(255,255,255,.05);
+        }
+
+        tbody tr:hover{
+            background: rgba(255,255,255,.03);
+        }
+
+        .badge-ok{
+            background: rgba(50,213,131,.15);
+            color: var(--success);
+            padding: 6px 10px;
+            border-radius: 20px;
+        }
+
+        .badge-bad{
+            background: rgba(224,75,75,.15);
+            color: var(--danger);
+            padding: 6px 10px;
+            border-radius: 20px;
+        }
+
+        .avatar{
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(246,161,26,.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        a.nome-link{
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a.nome-link:hover{
+            color: var(--gold);
+        }
+                td, th {
+            padding: 16px !important;
+        }
+
+        tbody tr{
+            border-bottom: 1px solid rgba(255,255,255,.05);
+        }
+    </style>
 </head>
-<body class="bg-light container mt-4">
 
-<h1>🎯 Gerenciador de Assinaturas</h1>
+<body class="container-fluid px-4 mt-4">
 
-<div class="row mt-4">
-    <!-- Card Vence Hoje -->
+<h1 class="mb-4">🥊 Lucca Combat Team</h1>
+
+<div class="row g-3 mb-4">
+
+    <!-- Vence Hoje -->
     <div class="col-md-4">
-        <div class="card bg-danger text-white p-3 text-center shadow-sm">
-            <h3>Vence Hoje</h3>
-            <h2>0</h2>
+        <div class="card-lct">
+            <div class="label">Vence Hoje</div>
+            <div class="metric gold" th:text="${totalVenceHoje}">0</div>
         </div>
     </div>
 
-    <!-- Card Atrasados -->
+    <!-- Atrasados -->
     <div class="col-md-4">
-        <div class="card bg-dark text-white p-3 text-center shadow-sm">
-            <h3>Atrasados</h3>
-            <h2>0</h2>
+        <div class="card-lct">
+            <div class="label">Atrasados</div>
+            <div class="metric danger" th:text="${totalAtrasados}">0</div>
         </div>
     </div>
 
-    <!-- Botão Novo Aluno -->
+    <!-- Novo Aluno -->
     <div class="col-md-4">
-        <a href="/novo" class="btn btn-primary w-100 h-100 d-flex align-items-center justify-content-center fs-3 shadow-sm">
+        <a href="/novo" class="btn btn-gold w-100 h-100 d-flex align-items-center justify-content-center fs-4 shadow">
             + Novo Aluno
         </a>
     </div>
+
+</div>
+
+<!-- Tabela -->
+<div class="table-lct shadow">
+    <table class="table table-borderless mb-0">
+        <thead>
+        <tr>
+            <th class="ps-4">Aluno</th>
+            <th>Plano</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th class="text-center">Ação</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${alunos}">
+            <td class="ps-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar"
+                         th:text="${#strings.substring(a.nome,0,1).toUpperCase()}"></div>
+
+                    <a th:href="@{/aluno/{id}/historico(id=${a.id})}"
+                       th:text="${a.nome}"
+                       class="nome-link"></a>
+                </div>
+            </td>
+
+            <td th:text="${a.plano}"></td>
+
+            <td th:text="${a.diaVencimento}"></td>
+
+            <td>
+                <span th:if="${a.atrasado}" class="badge-bad">PENDENTE</span>
+                <span th:if="${!a.atrasado}" class="badge-ok">EM DIA</span>
+            </td>
+
+            <td class="text-center">
+                <form th:action="@{/pagar/{id}(id=${a.id})}" method="post">
+                    <button class="btn btn-outline-success btn-sm">
+                        ✅ Pago
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 </body>
